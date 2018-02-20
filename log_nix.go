@@ -7,10 +7,10 @@
 package logging
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 	"log"
+	"strings"
 )
 
 type color int
@@ -63,10 +63,14 @@ func (b *LogBackend) Log(level Level, calldepth int, rec *Record) error {
 			col = b.ColorConfig[level]
 		}
 
-		buf := &bytes.Buffer{}
+		/* buf := &bytes.Buffer{}
 		buf.Write([]byte(col))
 		buf.Write([]byte(rec.Formatted(calldepth + 1)))
-		buf.Write([]byte("\033[0m"))
+		buf.Write([]byte("\033[0m")) */
+		buf := strings.Builder{}
+		buf.WriteString(col)
+		buf.WriteString(rec.Formatted(calldepth + 1))
+		buf.WriteString("\033[0m")
 		// For some reason, the Go logger arbitrarily decided "2" was the correct
 		// call depth...
 		return b.Logger.Output(calldepth+2, buf.String())

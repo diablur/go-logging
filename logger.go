@@ -8,7 +8,6 @@
 package logging
 
 import (
-	"bytes"
 	"fmt"
 	"log"
 	"os"
@@ -58,7 +57,8 @@ type Record struct {
 // Formatted returns the formatted log record string.
 func (r *Record) Formatted(calldepth int) string {
 	if r.formatted == "" {
-		var buf bytes.Buffer
+		//var buf bytes.Buffer
+		var buf strings.Builder
 		r.formatter.Format(calldepth+1, r, &buf)
 		r.formatted = buf.String()
 	}
@@ -74,15 +74,19 @@ func (r *Record) Message() string {
 				r.Args[i] = redactor.Redacted()
 			}
 		}
-		var buf bytes.Buffer
+		//var buf bytes.Buffer
+		var buf strings.Builder
+		var msg string
 		if r.fmt != nil {
 			fmt.Fprintf(&buf, *r.fmt, r.Args...)
+			msg = buf.String()
 		} else {
 			// use Fprintln to make sure we always get space between arguments
 			fmt.Fprintln(&buf, r.Args...)
-			buf.Truncate(buf.Len() - 1) // strip newline
+			//buf.Truncate(buf.Len() - 1) // strip newline
+			msg = buf.String()
+			msg = msg[:buf.Len()-1] // strip newline
 		}
-		msg := buf.String()
 		r.message = &msg
 	}
 	return *r.message
